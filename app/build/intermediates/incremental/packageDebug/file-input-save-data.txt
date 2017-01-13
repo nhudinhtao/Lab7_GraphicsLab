@@ -1,0 +1,27 @@
+#Internal package file, do not edit.
+#Fri Jan 13 23:06:11 ICT 2017
+2.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+5.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/AndroidManifest.xml
+5.set=ANDROID_RESOURCE
+3.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/transforms/dex/debug/folders/1000/1f/main
+6.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/res/raw/bubble_pop.wav
+2.set=ANDROID_RESOURCE
+4.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+7.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/res/drawable-xhdpi-v4/ic_launcher.png
+7.set=ANDROID_RESOURCE
+count=8
+0.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/resources.arsc
+5.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+4.set=ANDROID_RESOURCE
+6.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+1.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/res/layout/main.xml
+1.set=ANDROID_RESOURCE
+7.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+2.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/res/drawable-nodpi-v4/b64.png
+6.set=ANDROID_RESOURCE
+0.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+3.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/transforms/dex/debug/folders/1000/1f/main/classes.dex
+3.set=DEX
+1.base=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_
+4.file=/Users/taonhu/Project/preference/Android-SDK-Navisens/Lab7_GraphicsLab/app/build/intermediates/res/resources-debug.ap_/res/menu/menu.xml
+0.set=ANDROID_RESOURCE
