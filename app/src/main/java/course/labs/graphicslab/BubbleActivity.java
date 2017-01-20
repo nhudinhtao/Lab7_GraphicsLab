@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.media.SoundPool.OnLoadCompleteListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -83,25 +84,21 @@ public class BubbleActivity extends Activity {
 				.getStreamVolume(AudioManager.STREAM_MUSIC)
 				/ mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
-		// TODO - make a new SoundPool, allowing up to 10 streams 
+		// make a new SoundPool, allowing up to 10 streams
 		mSoundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
 
+		// set a SoundPool OnLoadCompletedListener that calls
+		// setupGestureDetector()
 
-		// TODO - set a SoundPool OnLoadCompletedListener that calls setupGestureDetector()
-		mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+		mSoundPool.setOnLoadCompleteListener(new OnLoadCompleteListener() {
 			@Override
-			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-				if (0 == status) {
-					setupGestureDetector();
-				}
+			public void onLoadComplete(SoundPool soundPool, int i, int i2) {
+				setupGestureDetector();
 			}
 		});
 
-
-		
-		// TODO - load the sound from res/raw/bubble_pop.wav
-		mSoundID = mSoundPool.load(this, R.raw.bubble_pop, 1);
-
+		// load the sound from res/raw/bubble_pop.wav
+		mSoundPool.load(this, R.raw.bubble_pop, 1);
 	}
 
 	@Override
@@ -120,81 +117,77 @@ public class BubbleActivity extends Activity {
 	private void setupGestureDetector() {
 
 		mGestureDetector = new GestureDetector(this,
+				new GestureDetector.SimpleOnGestureListener() {
 
-		new GestureDetector.SimpleOnGestureListener() {
+					// If a fling gesture starts on a BubbleView then change the
+					// BubbleView's velocity
 
-			// If a fling gesture starts on a BubbleView then change the
-			// BubbleView's velocity
+					@Override
+					public boolean onFling(MotionEvent event1, MotionEvent event2,
+										   float velocityX, float velocityY) {
 
-			@Override
-			public boolean onFling(MotionEvent event1, MotionEvent event2,
-					float velocityX, float velocityY) {
+						// Implement onFling actions.
+						// You can get all Views in mFrame one at a time
+						// using the ViewGroup.getChildAt() method
+						for (int i = 0; i < mFrame.getChildCount(); i++) {
+							BubbleView current = (BubbleView) mFrame.getChildAt(i);
 
-				// TODO - Implement onFling actions.
-				// You can get all Views in mFrame using the
-				// ViewGroup.getChildCount() method
-                int count = mFrame.getChildCount();
+							if (current.intersects(event1.getRawX(), event1.getRawY())) {
+								current.deflect(velocityX, velocityY);
+								break;
+							}
+						}
 
-                for (int i = 0; i < count; i++) {
-                    BubbleView bubbleView = (BubbleView) mFrame.getChildAt(i);
-                    if (bubbleView.intersects(event1.getRawX(), event1.getRawY())) {
-                        bubbleView.deflect(velocityX, velocityY);
-                        return true;
-                    }
-                }
+						return true;
+					}
 
-				return false;
+					// If a single tap intersects a BubbleView, then pop the BubbleView
+					// Otherwise, create a new BubbleView at the tap's location and add
+					// it to mFrame. You can get all views from mFrame with
+					// ViewGroup.getChildAt()
 
-			}
+					@Override
+					public boolean onSingleTapConfirmed(MotionEvent event) {
 
-			// If a single tap intersects a BubbleView, then pop the BubbleView
-			// Otherwise, create a new BubbleView at the tap's location and add
-			// it to mFrame. You can get all views from mFrame with ViewGroup.getChildAt()
+						// Implement onSingleTapConfirmed actions.
+						// You can get all Views in mFrame using the
+						// ViewGroup.getChildCount() method
+						float x = event.getRawX();
+						float y = event.getRawY();
+						boolean createBubble = true;
 
-			@Override
-			public boolean onSingleTapConfirmed(MotionEvent event) {
+						for (int i = 0; i < mFrame.getChildCount(); i++) {
+							BubbleView currentBubble = (BubbleView) mFrame.getChildAt(i);
 
-				// TODO - Implement onSingleTapConfirmed actions.
-				// You can get all Views in mFrame using the
-				// ViewGroup.getChildCount() method
-                int count = mFrame.getChildCount();
+							if (currentBubble.intersects(x, y)) {
+								currentBubble.stopMovement(true);
+								createBubble = false;
+							}
+						}
 
-                int flag = 0;
+						if (createBubble) {
+							BubbleView newBubble = new BubbleView(mFrame.getContext(), x, y);
+							mFrame.addView(newBubble);
+							newBubble.startMovement();
+						}
 
-                for (int i = 0; i < count; i++) {
-                    BubbleView bubbleView = (BubbleView) mFrame.getChildAt(i);
-                    if (bubbleView.intersects(event.getRawX(), event.getRawY())) {
-                        bubbleView.stop(true);
-                        mFrame.removeView(bubbleView);
-                        return true;
-                    }
-                }
-
-                BubbleView bubbleViewNew = new BubbleView(getApplicationContext(), event.getX(), event.getY());
-                mFrame.addView(bubbleViewNew);
-                bubbleViewNew.start();
-
-				return false;
-			}
-		});
+						return true;
+					}
+				});
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
-		// TODO - Delegate the touch to the gestureDetector
-        mGestureDetector.onTouchEvent(event);
-
-		return false;
-	
+		// Delegate the touch to the gestureDetector
+		return mGestureDetector.onTouchEvent(event);
 	}
 
 	@Override
 	protected void onPause() {
-		
-		// TODO - Release all SoundPool resources
-        mSoundPool.release();
 
+		// Release all SoundPool resources
+		mSoundPool.release();
 		super.onPause();
 	}
 
@@ -235,7 +228,7 @@ public class BubbleActivity extends Activity {
 
 			// Set the BubbleView's speed and direction
 			setSpeedAndDirection(r);
-			
+
 			// Set the BubbleView's rotation
 			setRotation(r);
 
@@ -244,16 +237,13 @@ public class BubbleActivity extends Activity {
 		}
 
 		private void setRotation(Random r) {
-
 			if (speedMode == RANDOM) {
-				
-				// TODO - set rotation in range [1..3]
-				mDRotate = 0;
 
+				// set rotation in range [1..3]
+				mRotate = r.nextInt(3) + 1;
 
 			} else {
 				mDRotate = 0;
-			
 			}
 		}
 
@@ -262,26 +252,25 @@ public class BubbleActivity extends Activity {
 			// Used by test cases
 			switch (speedMode) {
 
-			case SINGLE:
+				case SINGLE:
 
-				mDx = 20;
-				mDy = 20;
-				break;
+					mDx = 20;
+					mDy = 20;
+					break;
 
-			case STILL:
+				case STILL:
 
-				// No speed
-				mDx = 0;
-				mDy = 0;
-				break;
+					// No speed
+					mDx = 0;
+					mDy = 0;
+					break;
 
-			default:
+				default:
 
-				// TODO - Set movement direction and speed
-				// Limit movement speed in the x and y
-				// direction to [-3..3] pixels per movement.
-                mDy = r.nextInt(3 - (-3)) -3;
-                mDx = r.nextInt(3 - (-3)) -3;
+					// Set mDx and mDy to indicate movement direction and speed
+					// Limit speed in the x and y direction to [-3..3] pixels per movement.
+					mDx = r.nextFloat() * 6.0f - 3.0f;
+					mDy = r.nextFloat() * 6.0f - 3.0f;
 
 			}
 		}
@@ -290,20 +279,21 @@ public class BubbleActivity extends Activity {
 
 			if (speedMode != RANDOM) {
 				mScaledBitmapWidth = BITMAP_SIZE * 3;
-			
 			} else {
-				//TODO - set scaled bitmap size in range [1..3] * BITMAP_SIZE
-				mScaledBitmapWidth = (r.nextInt(3 - 1) + 1) * BITMAP_SIZE;
-			
+
+				// set scaled bitmap size in range [1..3] * BITMAP_SIZE
+				int rand = r.nextInt(4 - 1) + 1;
+				mScaledBitmapWidth = rand * BITMAP_SIZE;
 			}
 
-			// TODO - create the scaled bitmap using size set above
-            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.b64);
-			mScaledBitmap = Bitmap.createScaledBitmap(bitmap, mScaledBitmapWidth, mScaledBitmapWidth, true);
+			// create the scaled bitmap using size set above
+			mScaledBitmap = Bitmap
+					.createScaledBitmap(mBitmap, mScaledBitmapWidth, mScaledBitmapWidth, true);
+
 		}
 
 		// Start moving the BubbleView & updating the display
-		private void start() {
+		private void startMovement() {
 
 			// Creates a WorkerThread
 			ScheduledExecutorService executor = Executors
@@ -316,138 +306,113 @@ public class BubbleActivity extends Activity {
 				@Override
 				public void run() {
 
-					// TODO - implement movement logic.
+					// implement movement logic.
 					// Each time this method is run the BubbleView should
-					// move one step. If the BubbleView exits the display, 
-					// stop the BubbleView's Worker Thread. 
-					// Otherwise, request that the BubbleView be redrawn. 
-                    if (!moveWhileOnScreen()) {
-                        postInvalidate();
-                    } else {
-                        stop(false);
-                    }
-
+					// move one step. If the BubbleView exits the display,
+					// stop the BubbleView's Worker Thread.
+					// Otherwise, request that the BubbleView be redrawn.
+					if ( moveWhileOnScreen() ) {
+						stopMovement(false);
+					} else {
+						BubbleView.this.postInvalidate();
+					}
 				}
 			}, 0, REFRESH_RATE, TimeUnit.MILLISECONDS);
 		}
 
 		// Returns true if the BubbleView intersects position (x,y)
 		private synchronized boolean intersects(float x, float y) {
+			// true if the BubbleView intersects position (x,y)
 
-			// TODO - Return true if the BubbleView intersects position (x,y)
-            if (x > mXPos && x < mXPos + mScaledBitmapWidth
-                    && y > mYPos && y < mYPos + mScaledBitmapWidth) {
-                return true;
-            }
+			if (mXPos <= x && x <= mXPos + mScaledBitmapWidth) {
+				if (mYPos <= y && y <= mYPos + mScaledBitmapWidth) {
+					return true;
+				}
+			}
 
-		    return false;
+			return false;
 		}
 
 		// Cancel the Bubble's movement
 		// Remove Bubble from mFrame
 		// Play pop sound if the BubbleView was popped
 
-		private void stop(final boolean wasPopped) {
+		private void stopMovement(final boolean wasPopped) {
 
-			if (null != mMoverFuture && !mMoverFuture.isDone()) {
-				mMoverFuture.cancel(true);
-			}
+			if (null != mMoverFuture) {
 
-			// This work will be performed on the UI Thread
-			mFrame.post(new Runnable() {
-				@Override
-				public void run() {
-
-					// TODO - Remove the BubbleView from mFrame
-                    mFrame.removeView(BubbleView.this);
-
-					// TODO - If the bubble was popped by user,
-					// play the popping sound
-					if (wasPopped) {
-                        mSoundPool.play(mSoundID, 1, 1, 0, 0, 1);
-					}
+				if (!mMoverFuture.isDone()) {
+					mMoverFuture.cancel(true);
 				}
-			});
+
+				// This work will be performed on the UI Thread
+				mFrame.post(new Runnable() {
+					@Override
+					public void run() {
+
+						// Remove the BubbleView from mFrame
+						mFrame.removeView(BubbleView.this);
+
+						// If the bubble was popped by user,
+						// play the popping sound
+						if (wasPopped) {
+							mSoundPool.play(mSoundID, mStreamVolume, mStreamVolume, 1, 0, 1f);
+						}
+					}
+				});
+			}
 		}
 
 		// Change the Bubble's speed and direction
 		private synchronized void deflect(float velocityX, float velocityY) {
-
-			//TODO - set mDx and mDy to be the new velocities divided by the REFRESH_RATE
-			mDx = velocityX/REFRESH_RATE;
-            mDy = velocityY/REFRESH_RATE;
+			mDx = velocityX / REFRESH_RATE;
+			mDy = velocityY / REFRESH_RATE;
 		}
 
 		// Draw the Bubble at its current location
 		@Override
 		protected synchronized void onDraw(Canvas canvas) {
 
-			// TODO - save the canvas
-            canvas.save();
+			// save the canvas
+			canvas.save();
 
 
-			
-			// TODO - increase the rotation of the original image by mDRotate
-            mRotate += mDRotate;
+			// increase the rotation of the original image by mDRotate
+			mRotate += mDRotate;
 
-
-
-			
-			// TODO Rotate the canvas by current rotation
+			// Rotate the canvas by current rotation
 			// Hint - Rotate around the bubble's center, not its position
-            canvas.rotate(mRotate, mXPos + mScaledBitmapWidth/2, mYPos + mScaledBitmapWidth/2);
+			canvas.rotate(mRotate, mXPos + (mScaledBitmapWidth / 2), mYPos + (mScaledBitmapWidth / 2));
 
+			// draw the bitmap at it's new location
+			canvas.drawBitmap(mScaledBitmap, mXPos, mYPos, mPainter);
 
-
-			
-			// TODO - draw the bitmap at its new location
-            canvas.drawBitmap(mScaledBitmap, mXPos, mYPos, mPainter);
-			
-
-			
-			// TODO - restore the canvas
-            canvas.restore();
-
-			
+			// restore the canvas
+			canvas.restore();
 		}
 
 		// Returns true if the BubbleView is still on the screen after the move
 		// operation
 		private synchronized boolean moveWhileOnScreen() {
 
-			// TODO - Move the BubbleView
-            mXPos += mDx;
-            mYPos += mDy;
+			// Move the BubbleView
+			mXPos += mDx;
+			mYPos += mDy;
 
-            if (isOutOfView()) {
-                return true;
-            }
+			return isOutOfView();
 
-			return false;
 		}
 
-		// Return true if the BubbleView is off the screen after the move
+		// Return true if the BubbleView is still on the screen after the move
 		// operation
 		private boolean isOutOfView() {
 
-			// TODO - Return true if the BubbleView is off the screen after
+			// Return true if the BubbleView is still on the screen after
 			// the move operation
-            if (mXPos > mDisplayWidth) {
-                return true;
-            }
-
-            if (mXPos + mScaledBitmapWidth < 0) {
-                return true;
-            }
-
-            if (mYPos > mDisplayHeight) {
-                return true;
-            }
-
-            if (mYPos + mScaledBitmapWidth < 0) {
-                return true;
-            }
-
+			if (mXPos + mDisplayWidth < 0 || mYPos + mDisplayHeight < 0)
+				return true;
+			if (mXPos > mDisplayWidth || mYPos > mDisplayHeight)
+				return true;
 
 			return false;
 		}
@@ -472,20 +437,20 @@ public class BubbleActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_still_mode:
-			speedMode = STILL;
-			return true;
-		case R.id.menu_single_speed:
-			speedMode = SINGLE;
-			return true;
-		case R.id.menu_random_mode:
-			speedMode = RANDOM;
-			return true;
-		case R.id.quit:
-			exitRequested();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
+			case R.id.menu_still_mode:
+				speedMode = STILL;
+				return true;
+			case R.id.menu_single_speed:
+				speedMode = SINGLE;
+				return true;
+			case R.id.menu_random_mode:
+				speedMode = RANDOM;
+				return true;
+			case R.id.quit:
+				exitRequested();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 
